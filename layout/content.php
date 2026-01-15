@@ -1,228 +1,136 @@
+
+
 <div class="content">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-6">
-
-                <!-- Header -->
-                <header>
-                    <h2>Task Management System</h2>
-                    <hr>
-                </header>
-
-                <!-- Section 1: Tasks grouped by status -->
-<!--                <section>-->
-<!--                    <h3>Tasks by Status</h3>-->
-<!---->
-<!--                    <table border="1" cellpadding="10" width="100%">-->
-<!--                        <tr>-->
-<!--                            <th>Status</th>-->
-<!--                            <th>Value</th>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>To Do</td>-->
-<!--                            <td>4</td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>In Progress</td>-->
-<!--                            <td>3</td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>Done</td>-->
-<!--                            <td>7</td>-->
-<!--                        </tr>-->
-<!---->
-<!--                    </table>-->
-<!---->
-<!--                </section> -->
-                <br>
-<!--                <section>-->
-<!--                    <h3>Tasks by Priority</h3>-->
-<!---->
-<!--                    <table border="1" cellpadding="10" width="100%">-->
-<!--                        <tr>-->
-<!--                            <th>Priority</th>-->
-<!--                            <th>condition</th>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>Low</td>-->
-<!--                            <td>---</td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>High</td>-->
-<!--                            <td>---</td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>Done</td>-->
-<!--                            <td>---</td>-->
-<!--                        </tr>-->
-<!--                    </table>-->
-<!--                </section> -->
-                <br>
-                  <!-- Section 2: Overdue Tasks -->
-<!--                <section>-->
-<!--                    <h3>Overdue Tasks</h3>-->
-<!---->
-<!--                    <table border="1" cellpadding="10" width="100%">-->
-<!--                        <tr>-->
-<!--                            <th>Task Title</th>-->
-<!--                            <th>Project</th>-->
-<!--                            <th>Due Date</th>-->
-<!--                            <th>Assigned User</th>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>Design Dashboard</td>-->
-<!--                            <td>Website Project</td>-->
-<!--                            <td>2025-12-15</td>-->
-<!--                            <td>tareq</td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>php page</td>-->
-<!--                            <td>Sectors System</td>-->
-<!--                            <td>2026-1-10</td>-->
-<!--                            <td>omar</td>-->
-<!--                        </tr>-->
-<!--                    </table>-->
-<!--                </section>  -->
-
-
-                <!-- Main content -->
-                <section class="content">
-                    <div class="container-fluid">
-
-                        <!-- العنوان الرئيسي زي الـ PDF -->
-                        <!-- Tasks grouped by status - جدول بسيط -->
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="card card-primary">
-                                    <div class="card-header">
-                                        <h3 class="card-title">Number of tasks grouped by status</h3>
-                                    </div>
-                                    <div class="card-body">
-                                        <table class="table table-bordered table-striped">
-                                            <thead>
-                                            <tr>
-                                                <th>Status</th>
-                                                <th>Number of Tasks</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr>
-                                                <td>To Do</td>
-                                                <td class="text-info font-weight-bold"><?php echo $tasksByStatus['To Do'] ?? 0; ?></td>
-                                            </tr>
-                                            <tr>
-                                                <td>In Progress</td>
-                                                <td class="text-warning font-weight-bold"><?php echo $tasksByStatus['In Progress'] ?? 0; ?></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Done</td>
-                                                <td class="text-success font-weight-bold"><?php echo $tasksByStatus['Done'] ?? 0; ?></td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Overdue Tasks -->
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="card card-danger">
-                                    <div class="card-header">
-                                        <h3 class="card-title">Overdue tasks (due date < today and not completed)</h3>
-                                    </div>
-                                    <div class="card-body table-responsive p-0">
-                                        <table class="table table-bordered table-striped">
-                                            <thead>
-                                            <tr>
-                                                <th>Task Title</th>
-                                                <th>Project</th>
-                                                <th>Due Date</th>
-                                                <th>Assigned User</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <?php if (empty($overdueTasks)): ?>
-                                                <tr>
-                                                    <td colspan="4" class="text-center text-success">لا توجد مهام متأخرة حاليًا</td>
-                                                </tr>
-                                            <?php else: ?>
-                                                <?php foreach ($overdueTasks as $task): ?>
-                                                    <tr>
-                                                        <td><?php echo htmlspecialchars($task['title']); ?></td>
-                                                        <td><?php echo htmlspecialchars($task['project_name'] ?? 'غير محدد'); ?></td>
-                                                        <td><span class="badge badge-danger"><?php echo htmlspecialchars($task['due_date']); ?></span></td>
-                                                        <td><?php echo htmlspecialchars($task['assigned_username'] ?? 'غير معين'); ?></td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tasks assigned to the currently logged-in user -->
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="card card-info">
-                                    <div class="card-header">
-                                        <h3 class="card-title">Tasks assigned to the currently logged-in user</h3>
-                                    </div>
-                                    <div class="card-body table-responsive p-0">
-                                        <table class="table table-bordered table-striped">
-                                            <thead>
-                                            <tr>
-                                                <th>Task Title</th>
-                                                <th>Project</th>
-                                                <th>Status</th>
-                                                <th>Priority</th>
-                                                <th>Due Date</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <?php if (empty($assignedTasks)): ?>
-                                                <tr>
-                                                    <td colspan="5" class="text-center text-muted">لا توجد مهام معينة لك حاليًا</td>
-                                                </tr>
-                                            <?php else: ?>
-                                                <?php foreach ($assignedTasks as $task): ?>
-                                                    <tr>
-                                                        <td><?php echo htmlspecialchars($task['title']); ?></td>
-                                                        <td><?php echo htmlspecialchars($task['project_name'] ?? 'غير محدد'); ?></td>
-                                                        <td>
-                                                <span class="badge badge-<?php echo $task['status'] == 'Done' ? 'success' : ($task['status'] == 'In Progress' ? 'warning' : 'info'); ?>">
-                                                    <?php echo htmlspecialchars($task['status']); ?>
-                                                </span>
-                                                        </td>
-                                                        <td>
-                                                <span class="badge badge-<?php echo $task['priority'] == 'High' ? 'danger' : ($task['priority'] == 'Medium' ? 'warning' : 'secondary'); ?>">
-                                                    <?php echo htmlspecialchars($task['priority']); ?>
-                                                </span>
-                                                        </td>
-                                                        <td><?php echo $task['due_date'] ? htmlspecialchars($task['due_date']) : '-'; ?></td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </section>
-
-
-            </div>
-
+        <div class="content-header">
+            <h2 class="text-dark"><i class="fas fa-th-large mr-2"></i>Task Management System</h2>
+            <hr>
         </div>
 
-    </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-widget widget-user-2 shadow">
+                    <div class="widget-user-header bg-navy">
+                        <div class="widget-user-image">
+                            <img class="img-circle elevation-2" src="https://ui-avatars.com/api/?name=<?php echo urlencode($_SESSION['username']); ?>&background=random" alt="User Avatar">
+                        </div>
+                        <h3 class="widget-user-username">أهلاً، <?php echo htmlspecialchars($_SESSION['username']);?> </h3>
+                        <h5 class="widget-user-desc"><?php echo $_SESSION['role'] == 'Admin' ? 'مدير النظام (Admin)' : 'عضو فريق (Member)';?> </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3><?php echo $tasksByStatus['To Do'] ?? 0; ?></h3>
+                        <p>مهام للقيام بها (To Do)</p>
+                    </div>
+                    <div class="icon"><i class="fas fa-list"></i></div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3><?php echo $tasksByStatus['In Progress'] ?? 0; ?></h3>
+                        <p>قيد التنفيذ (In Progress) </p>
+                    </div>
+                    <div class="icon"><i class="fas fa-spin"></i></div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3><?php echo $tasksByStatus['Done'] ?? 0; ?></h3>
+                        <p>مهام مكتملة (Done) </p>
+                    </div>
+                    <div class="icon"><i class="fas fa-check-double"></i></div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3><?php echo count($overdueTasks); ?></h3>
+                        <p>مهام متأخرة (Overdue)</p>
+                    </div>
+                    <div class="icon"><i class="fas fa-clock"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card card-danger card-outline shadow-sm">
+                    <div class="card-header">
+                        <h3 class="card-title text-danger"><i class="fas fa-exclamation-circle mr-1"></i> Late tasks </h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                            <tr>
+                               <th>Tasks</th>
+                                <th>Projects</th>
+                                <th>Dates </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php if (empty($overdueTasks)): ?>
+                                <tr><td colspan="3" class="text-center py-3"> No tasks currently pending.ً</td></tr>
+                            <?php else: foreach ($overdueTasks as $task): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($task['title']); ?></td>
+                                    <td><span class="badge badge-secondary"><?php echo htmlspecialchars($task['project_name']); ?></span></td>
+                                    <td><span class="text-danger font-weight-bold"><?php echo $task['due_date']; ?></span></td>
+                                </tr>
+                            <?php endforeach; endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card card-primary card-outline shadow-sm">
+                    <div class="card-header">
+                        <h3 class="card-title text-primary"><i class="fas fa-user-tag mr-1"></i> My assigned tasks </h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                            <tr>
+                               <th>Tasks </th>
+                               <th>Priority </th>
+                               <th>Condition </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php if (empty($assignedTasks)): ?>
+                                <tr><td colspan="3" class="text-center py-3"> No assigned tasks yet.</td></tr>
+                            <?php else: foreach ($assignedTasks as $task): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($task['title']); ?></td>
+                                    <td>
+                                        <?php
+                                        // التأكد من وجود القيمة أو وضع 'Low' كافتراضي
+                                        $priority = $task['priority'] ?? 'Low';
+
+                                        $p_class = $priority == 'High' ? 'danger' : ($priority == 'Medium' ? 'warning' : 'info');
+
+                                        echo "<span class='badge badge-$p_class'>" . htmlspecialchars($priority) . "</span>";
+                                        ?>
+                                    </td>
+                                    <td><span class="badge badge-light border"><?php echo $task['status']; ?></span></td>
+                                </tr>
+                            <?php endforeach; endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <?php

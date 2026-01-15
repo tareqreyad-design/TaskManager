@@ -1,6 +1,6 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="" class="brand-link">
+    <a href="dashbord.php" class="brand-link">
         <span class="brand-text font-weight-light"> Task Management </span>
     </a>
     <!-- Sidebar -->
@@ -9,19 +9,23 @@
             <div class="brand-panel mt-3 pb-3 mb-3 d-flex align-items-center">
 
                 <!-- Company Logo -->
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeSbQJNKj9EOPmYgd0ldW5Uy4C6P4wbVRrIEIk4XXE5Q&s"
+                <div class="image">
+                <img src="#"
                      alt="Company Logo"
                      style="width:40px; height:40px; opacity:0.9;">
+                </div>
 
                 <!-- Company Name -->
                 <div class="info ml-2" style="color: antiquewhite; font-weight: bold;">
-                    <span class="d-none d-md-inline">Sectors Construction</span>
+<!--                    <a href="#" class="d-block">--><?php //echo htmlspecialchars($_SESSION['username'] ?? 'Guest'); ?><!--</a>-->
+                    <span class="d-none d-md-inline">Company name</span>
                 </div>
 
             </div>
         <!-- SidebarSearch Form -->
 
         <div class="form-inline">
+<!--            <i class="nav-icon fas fa-tachometer-alt"></i>-->
             <div class="use"> <a>Core Functionalities :</a> </div>
 
             <div class="input-group" data-widget="sidebar-search">
@@ -37,54 +41,35 @@
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
                 <li class="nav-item has-treeview">
-                    <a href="?controller=dashboard" class="nav-link">
-                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'Admin'): ?>
+
+                    <a href="#" class="nav-link">
+                        <i class="av-icon fas fa-users-cog"></i>
                         <p> User Management
-                            <i class="right fas fa-angle-left"></i>
+                            <i class="fas fa-angle-left right"></i>
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="?controller=dashboard" class="nav-link ">
+                            <a href="users_create.php" class="nav-link ">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Create new users </p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="?controller=dashboard" class="nav-link">
+                            <a href="users.php" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>Edit user details </p>
+                                <p>Edit users details </p>
                             </a>
                         </li>
-                        <li class="nav-item ">
-                            <a href="?controller=dashboard" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Disable / enable users </p>
-                            </a>
-                        </li>
-                        <li class="nav-item ">
-                            <a href="?controller=dashboard" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Assign user roles  </p>
-                            </a>
-                            <ul>
 
-                                <li> <a href="?controller=dashboard" class="nav-link">
-                                        <p>Admin </p>
-                                    </a> </li>
-                                <li> <a href="?controller=dashboard" class="nav-link">
-                                        <p>Member</p>
-                                    </a> </li>
-
-                            </ul>
-                        </li>
                     </ul>
-
                 </li>
+                <?php endif; ?>
 
                 <li class="nav-item has-treeview">
-                    <a href="?controller=dashboard" class="nav-link">
-                        <i class="nav-icon fas fa-folder"></i>
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-project-diagram"></i>
                         <p>
                             Project Management
                             <i class="fas fa-angle-left right"></i>
@@ -92,118 +77,42 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="?controller=dashboard" class="nav-link">
+                            <a href="projects_create.php" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>Create new projects </p>
+                                <p>Create new projects  </p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="?controller=dashboard" class="nav-link">
+                            <a href="projects.php" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>Assign users to projects </p>
+                                <p>Edit projects details </p>
                             </a>
                         </li>
                     </ul>
                 </li>
 
                 <li class="nav-item has-treeview">
-                    <a href="?controller=dashboard" class="nav-link">
+                    <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-tasks"></i>
                         <p>
                             Task Management
-                            <i class="fas fa-angle-left right"></i>
+                            <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="?controller=dashboard" class="nav-link">
+                            <a href="tasks_create.php" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>Title  </p>
+                                <p>Create new tasks  </p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="?controller=dashboard" class="nav-link">
+                            <a href="tasks.php" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p> Description  </p>
+                                <p> Edit tasks details  </p>
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="?controller=dashboard" class="nav-link ">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Status  </p>
-                            </a>
-                            <ul>
-                                <li> <a href="?controller=dashboard" class="nav-link">To Do </a> </li>
-                                <li> <a href="?controller=dashboard" class="nav-link">In Progress </a> </li>
-                                <li> <a href="?controller=dashboard" class="nav-link">Done </a> </li>
-                            </ul>
-                        </li>
-                        <li class="nav-item">
-                            <a href="?controller=dashboard" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>  Priority:   </p>
-                            </a>
-                            <ul>
-                                <li> <a href="?controller=dashboard" class="nav-link">Low </a> </li>
-                                <li> <a href="?controller=dashboard" class="nav-link">Medium  </a> </li>
-                                <li> <a href="?controller=dashboard" class="nav-link">High  </a> </li>
-                            </ul>
-                        </li>
-                        <li class="nav-item">
-                            <a href="?controller=dashboard" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p> Due Date   </p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="?controller=dashboard" class="nav-link ">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p> Assigned User  </p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="?controller=dashboard" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>  Functionalities: </p>
-                            </a>
-                            <ul>
-                                <li> <a href="?controller=dashboard" class="nav-link">Create task </a> </li>
-                                <li> <a href="?controller=dashboard" class="nav-link">Edit task </a> </li>
-                                <li> <a href="?controller=dashboard" class="nav-link">Change task status </a> </li>
-                            </ul>
                         </li>
 
-                    </ul>
-                </li>
-
-                <li class="nav-item has-treeview">
-                    <a href="?controller=dashboard" class="nav-link">
-                        <i class="nav-icon fas fa-folder"></i>
-                        <p>
-                            Dashboard
-                            <i class="fas fa-angle-left right"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="?controller=dashboard" class="nav-link ">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Number of tasks grouped </p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="?controller=dashboard" class="nav-link ">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Overdue tasks </p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="?controller=dashboard" class="nav-link ">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Tasks assigned</p>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
 
             </ul>

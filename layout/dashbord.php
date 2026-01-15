@@ -1,11 +1,53 @@
+
 <?php
 session_start();
+require_once 'db.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
+try {
+    // 1. حساب عدد المهام بناءً على الحالة
+    $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM tasks GROUP BY status");
+    $tasksByStatus = [];
+    while ($row = $stmt->fetch()) {
+        $tasksByStatus[$row['status']] = $row['count'];
+    }
+
+    // 2. المهام المتأخرة (التاريخ أصغر من النهاردة ومش Done)
+    $stmt = $pdo->prepare("
+        SELECT t.*, p.name as project_name 
+        FROM tasks t 
+        LEFT JOIN projects p ON t.project_id = p.id 
+        WHERE t.due_date < CURDATE() AND t.status != 'Done'
+        ORDER BY t.due_date ASC
+    ");
+    $stmt->execute();
+    $overdueTasks = $stmt->fetchAll();
+
+    // 3. المهام المعينة للمستخدم الحالي (مع التأكد من جلب كل العواميد)
+    $stmt = $pdo->prepare("
+        SELECT t.*, p.name as project_name 
+        FROM tasks t 
+        LEFT JOIN projects p ON t.project_id = p.id 
+        WHERE t.assigned_user_id = ?
+        ORDER BY t.created_at DESC
+    ");
+    $stmt->execute([$_SESSION['user_id']]);
+    $assignedTasks = $stmt->fetchAll();
+
+    // 4. عدد المشاريع الكلي (عشان الـ Content ما يضربش)
+    $stmt = $pdo->query("SELECT COUNT(*) as total FROM projects");
+    $projectData = $stmt->fetch();
+    $TotalProjectsCount = $projectData['total'];
+
+} catch (PDOException $e) {
+    die("Database Error " . $e->getMessage());
+}
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,14 +62,12 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="../css/adminlte.css">
 
 </head>
-<body class="hold-transition sidebar-mini layout-fixed sidebar-collapse">
+<body class="hold-transition sidebar-mini layout-fixed">
 
 <div class="wrapper">
     <!-- Navbar -->
     <?php include 'nav.php'; ?>
-
     <!-- /.navbar -->
-
 
     <!--     Main Sidebar Container-->
     <?php include 'aside.php'; ?>
@@ -42,17 +82,54 @@ if (!isset($_SESSION['user_id'])) {
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="#">Project</a></li>
-                            <li class="breadcrumb-item active">Dashboard</li>
+                            <li class="breadcrumb-item"><a href="projects.php">Project</a></li>
+                            <li class="breadcrumb-item active"><a href="tasks.php">Task</a> </li>
                         </ol>
                     </div>
                 </div>
             </div>
         </div>
         <!-- /.content-header -->
+
+
         <section class="content">
             <div class="container-fluid">
         <!-- Main content -->
+                <?php
+                // جلب البيانات الحقيقية من قاعدة البيانات
+                require_once 'db.php';
+                // 1. عدد المهام حسب الحالة
+                $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM tasks GROUP BY status");
+                $results = $stmt->fetchAll();
+                $tasksByStatus = ['To Do' => 0, 'In Progress' => 0, 'Done' => 0];
+                foreach ($results as $row) {
+                    $tasksByStatus[$row['status']] = $row['count'];
+                }
+                $TotalProjects = $pdo->query("SELECT id FROM projects")->fetchAll();
+
+                // 2. المهام المتأخرة (due_date < اليوم ومش Done)
+                $stmt = $pdo->prepare("
+    SELECT t.*, p.name as project_name, u.username as assigned_username
+    FROM tasks t
+    JOIN projects p ON t.project_id = p.id
+    LEFT JOIN users u ON t.assigned_user_id = u.id
+    WHERE t.due_date < CURDATE() AND t.status != 'Done'
+");
+                $stmt->execute();
+                $overdueTasks = $stmt->fetchAll();
+
+                // 3. المهام المعينة للمستخدم الحالي
+                $stmt = $pdo->prepare("
+    SELECT t.*, p.name as project_name
+    FROM tasks t
+    JOIN projects p ON t.project_id = p.id
+    WHERE t.assigned_user_id = ?
+");
+                $stmt->execute([$_SESSION['user_id']]);
+                $assignedTasks = $stmt->fetchAll();
+                ?>
+
+
         <?php include 'content.php'; ?>
 
           </div>
