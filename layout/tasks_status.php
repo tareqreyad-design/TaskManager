@@ -1,45 +1,63 @@
 <?php
 session_start();
-require_once 'db.php'; // التأكد من الاتصال بقاعدة البيانات [cite: 51]
+require_once 'db.php';
 
-// 1. حماية الصفحة
+// 1. التأكد من تسجيل الدخول
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header('Location: login.php');
     exit;
 }
 
-// 2. الحصول على ID المهمة من الرابط
+// 2. استقبال رقم المهمة
 $id = $_GET['id'] ?? null;
-if (!$id) {
-    header("Location: tasks.php");
-    exit;
-}
 
-// 3. جلب البيانات الحالية للمهمة
-$stmt = $pdo->prepare("SELECT title, status FROM tasks WHERE id = ?");
-$stmt->execute([$id]);
-$task = $stmt->fetch();
+if ($id) {
+    try {
+        // جلب الحالة الحالية
+        $stmt = $pdo->prepare("SELECT status FROM tasks WHERE id = ?");
+        $stmt->execute([$id]);
+        $task = $stmt->fetch();
 
-if (!$task) {
-    die("المهمة غير موجودة!");
-}
+        if ($task) {
+            // trim: بتمسح أي مسافات فاضية في الأول أو الآخر عشان المقارنة تنجح
+            $current_status = trim($task['status']);
+            $new_status = 'To Do'; // قيمة افتراضية
 
-// 4. معالجة تحديث الحالة عند إرسال الفورم
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $newStatus = $_POST['status'];
+            // منطق التغيير (دورة الحالة)
+            switch ($current_status) {
+                case 'To Do':
+                    $new_status = 'In Progress';
+                    break;
+                case 'In Progress':
+                    $new_status = 'Done';
+                    break;
+                case 'Done':
+                    $new_status = 'To Do';
+                    break;
+                default:
+                    // لو الحالة غريبة (مثلاً فاضية)، خليها To Do
+                    $new_status = 'To Do';
+            }
 
-    // التحديث باستخدام Prepared Statements [cite: 52]
-    $updateStmt = $pdo->prepare("UPDATE tasks SET status = ? WHERE id = ?");
-
-    if ($updateStmt->execute([$newStatus, $id])) {
-        // العودة لصفحة المهام مع رسالة نجاح
-        header("Location: tasks.php?success=status_updated");
-        exit;
-    } else {
-        $error = "فشل في تحديث الحالة.";
+            // تنفيذ التحديث
+            $updateStmt = $pdo->prepare("UPDATE tasks SET status = ? WHERE id = ?");
+            $updateStmt->execute([$new_status, $id]);
+        }
+    } catch (PDOException $e) {
+        // لو حصل خطأ، مش هنعرضه لليوزر عشان الشكل، بس مش هيغير الحالة
+        die("Error: " . $e->getMessage());
     }
 }
+
+// 3. العودة للصفحة السابقة
+if (isset($_SERVER['HTTP_REFERER'])) {
+    header("Location: " . $_SERVER['HTTP_REFERER']);
+} else {
+    header("Location: tasks.php");
+}
+exit;
 ?>
+
 
 <!DOCTYPE html>
 <html lang="ar" dir="ltr">

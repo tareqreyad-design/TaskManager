@@ -7,53 +7,68 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
-try {
-    // 1. حساب عدد المهام بناءً على الحالة
-    $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM tasks GROUP BY status");
-    $tasksByStatus = [];
-    while ($row = $stmt->fetch()) {
-        $tasksByStatus[$row['status']] = $row['count'];
-    }
 
-    // 2. المهام المتأخرة (التاريخ أصغر من النهاردة ومش Done)
-    $stmt = $pdo->prepare("
-        SELECT t.*, p.name as project_name 
-        FROM tasks t 
-        LEFT JOIN projects p ON t.project_id = p.id 
+$user_id = $_SESSION['user_id'];
+$role = $_SESSION['role'] ?? 'Member';
+
+try {
+    // 1. إحصائيات المهام (عدد المهام لكل حالة)
+    // لو أدمن بيشوف كل حاجة، لو ميمبر بيشوف الإحصائيات بتاعته هو بس (أو ممكن تخليه يشوف ككل حسب رغبتك)
+    // هنا هنعملها عامة للمشروع ككل عشان الداشبورد يبقى شكلها غني
+    $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM tasks GROUP BY status");
+    $stats = $stmt->fetchAll(PDO::FETCH_KEY_PAIR); // ['To Do' => 5, 'Done' => 3]
+
+    // تجهيز الأرقام (عشان لو الحالة مش موجودة نكتب 0)
+    $todo_count = $stats['To Do'] ?? 0;
+    $progress_count = $stats['In Progress'] ?? 0;
+    $done_count = $stats['Done'] ?? 0;
+
+    // 2. المهام المتأخرة (تاريخها عدى ومش مكتملة)
+    // بنجيب اسم التاسك واسم المشروع
+    $overdueStmt = $pdo->prepare("
+        SELECT t.title, t.due_date, p.name as project_name
+        FROM tasks t
+        JOIN projects p ON t.project_id = p.id
         WHERE t.due_date < CURDATE() AND t.status != 'Done'
         ORDER BY t.due_date ASC
+        LIMIT 5
     ");
     $stmt->execute();
     $overdueTasks = $stmt->fetchAll();
 
-    // 3. المهام المعينة للمستخدم الحالي (مع التأكد من جلب كل العواميد)
-    $stmt = $pdo->prepare("
-        SELECT t.*, p.name as project_name 
-        FROM tasks t 
-        LEFT JOIN projects p ON t.project_id = p.id 
-        WHERE t.assigned_user_id = ?
-        ORDER BY t.created_at DESC
+    // 3. مهامي الحالية (Assigned to currently logged-in user)
+    $myTasksStmt = $pdo->prepare("
+        SELECT t.title, t.status, t.priority, p.name as project_name
+        FROM tasks t
+        JOIN projects p ON t.project_id = p.id
+        WHERE t.assigned_user_id = ? AND t.status != 'Done'
+        ORDER BY t.priority DESC, t.due_date ASC
+        LIMIT 5
     ");
-    $stmt->execute([$_SESSION['user_id']]);
-    $assignedTasks = $stmt->fetchAll();
 
-    // 4. عدد المشاريع الكلي (عشان الـ Content ما يضربش)
-    $stmt = $pdo->query("SELECT COUNT(*) as total FROM projects");
-    $projectData = $stmt->fetch();
-    $TotalProjectsCount = $projectData['total'];
+    // 3. مهامي الحالية (Assigned to currently logged-in user)
+    $myTasksStmt = $pdo->prepare("
+        SELECT t.title, t.status, t.priority, p.name as project_name
+        FROM tasks t
+        JOIN projects p ON t.project_id = p.id
+        WHERE t.assigned_user_id = ? AND t.status != 'Done'
+        ORDER BY t.priority DESC, t.due_date ASC
+        LIMIT 5
+    ");
+    $myTasksStmt->execute([$user_id]);
+    $myTasks = $myTasksStmt->fetchAll();
 
 } catch (PDOException $e) {
-    die("Database Error " . $e->getMessage());
+    die("Error: " . $e->getMessage());
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>starter</title>
+    <title> DashBord</title>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <!-- Font Awesome Icons -->
@@ -80,18 +95,11 @@ try {
                 <div class="row mb-2">
                     <div class="col-sm-6">
                     </div>
-                    <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="projects.php">Project</a></li>
-                            <li class="breadcrumb-item active"><a href="tasks.php">Task</a> </li>
-                        </ol>
-                    </div>
                 </div>
             </div>
         </div>
         <!-- /.content-header -->
-
-
+        
         <section class="content">
             <div class="container-fluid">
         <!-- Main content -->

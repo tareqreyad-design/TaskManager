@@ -1,23 +1,48 @@
 <?php
 session_start();
+require_once 'db.php';
 
-// حماية الصفحة (كل المستخدمين يشوفوا، لكن الأدمن يقدر يعدل/يحذف)
+// التأكد من تسجيل الدخول
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
 }
 
-require_once 'db.php';
+$user_id = $_SESSION['user_id'];
+$role = $_SESSION['role'] ?? 'Member';
 
-// جيب كل المشاريع
-$stmt = $pdo->prepare("
-    SELECT p.*, COUNT(pu.user_id) as user_count
-    FROM projects p
-    LEFT JOIN project_users pu ON p.id = pu.project_id
-    GROUP BY p.id
-    ORDER BY p.created_at DESC
-");
-$stmt->execute();
+// منطق جلب المشاريع بناءً على الصلاحية
+if ($role === 'Admin') {
+    // الأدمن يشوف كل المشاريع
+    $sql = "
+        SELECT p.*, 
+               COUNT(pu.user_id) as user_count,
+               GROUP_CONCAT(u.username SEPARATOR ', ') as team_members
+        FROM projects p
+        LEFT JOIN project_users pu ON p.id = pu.project_id
+        LEFT JOIN users u ON pu.user_id = u.id
+        GROUP BY p.id
+        ORDER BY p.created_at DESC
+    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+} else {
+    // العضو يشوف بس المشاريع اللي هو جزء منها
+    $sql = "
+        SELECT p.*, 
+               COUNT(all_pu.user_id) as user_count,
+               GROUP_CONCAT(u.username SEPARATOR ', ') as team_members
+        FROM projects p
+        JOIN project_users my_pu ON p.id = my_pu.project_id AND my_pu.user_id = ? 
+        LEFT JOIN project_users all_pu ON p.id = all_pu.project_id
+        LEFT JOIN users u ON all_pu.user_id = u.id
+        GROUP BY p.id
+        ORDER BY p.created_at DESC
+    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$user_id]);
+}
+
 $projects = $stmt->fetchAll();
 ?>
 
@@ -96,12 +121,18 @@ $projects = $stmt->fetchAll();
                                         <td><span class="badge badge-info"><?php echo $project['user_count']; ?></span></td>
                                         <td><?php echo date('Y-m-d', strtotime($project['created_at'])); ?></td>
                                         <td>
-                                            <a href="projects_edit.php?id=<?php echo $project['id']; ?>" class="btn btn-sm btn-warning">
-                                                <i class="fas fa-edit"></i> تعديل
+                                            <a href="tasks.php?project_id=<?php echo $project['id']; ?>" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i> عرض
                                             </a>
-                                            <a href="projects_delete.php?id=<?php echo $project['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('متأكد من حذف المشروع؟');">
-                                                <i class="fas fa-trash"></i> حذف
-                                            </a>
+
+                                            <?php if ($_SESSION['role'] === 'Admin'): ?>
+                                                <a href="projects_edit.php?id=<?php echo $project['id']; ?>" class="btn btn-sm btn-warning">
+                                                    <i class="fas fa-edit"></i> تعديل
+                                                </a>
+                                                <a href="projects_delete.php?id=<?php echo $project['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('متأكد من حذف المشروع؟ سيتم حذف جميع المهام بداخله!');">
+                                                    <i class="fas fa-trash"></i> حذف
+                                                </a>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -115,7 +146,9 @@ $projects = $stmt->fetchAll();
     </div>
 
     <?php include 'footer.php'; ?>
+
 </div>
+
 <script src="../js/jquery.min.js"></script>
 <!-- Bootstrap 4 -->
 <script src="../js/bootstrap.bundle.js"></script>

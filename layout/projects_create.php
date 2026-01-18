@@ -1,28 +1,68 @@
 <?php
 session_start();
+require_once 'db.php';
+
+// التأكد من تسجيل الدخول
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
 }
 
-require_once 'db.php';
+// جلب المستخدمين
+$userStmt = $pdo->query("SELECT id, username FROM users WHERE is_active = 1 AND role != 'Admin'");
+$allUsers = $userStmt->fetchAll();
 
 $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name'] ?? '');
-    $description = trim($_POST['description'] ?? '');
+
+    // استقبال البيانات
+    $name = $_POST['name'] ?? '';
+    $description = $_POST['description'] ?? '';
+
+    // استقبال المستخدمين وإزالة التكرار (الحل الجذري للمشكلة)
+    $selected_users = $_POST['users'] ?? [];
+    $selected_users = array_unique($selected_users); // <--- السطر ده هو الحل
+
+    $permissions = $_POST['can_edit'] ?? [];
 
     if (empty($name)) {
-        $error = 'اسم المشروع مطلوب';
+        $error = "اسم المشروع مطلوب";
     } else {
         try {
+            $pdo->beginTransaction();
+
+            // 1. إنشاء المشروع
             $stmt = $pdo->prepare("INSERT INTO projects (name, description) VALUES (?, ?)");
             $stmt->execute([$name, $description]);
-            $success = 'تم إضافة المشروع بنجاح!';
-        } catch (PDOException $e) {
-            $error = 'خطأ في الإضافة';
+            $project_id = $pdo->lastInsertId();
+
+            // 2. إضافة الأعضاء (بعد حذف التكرار)
+            if (!empty($selected_users)) {
+                $assignStmt = $pdo->prepare("INSERT INTO project_users (project_id, user_id, can_edit) VALUES (?, ?, ?)");
+
+                foreach ($selected_users as $user_id) {
+                    // تأكد إن الـ ID رقم صحيح ومش فاضي
+                    if(!empty($user_id)) {
+                        $can_edit = isset($permissions[$user_id]) ? 1 : 0;
+                        $assignStmt->execute([$project_id, $user_id, $can_edit]);
+                    }
+                }
+            }
+
+            $pdo->commit();
+            header("Location: projects.php?success=created");
+            exit;
+
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            // لو الخطأ تكرار، نطلع رسالة مفهومة
+            if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                $error = "يبدو أنك حاولت إضافة نفس المستخدم للمشروع مرتين.";
+            } else {
+                $error = "حدث خطأ: " . $e->getMessage();
+            }
         }
     }
 }
@@ -88,6 +128,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <label>الوصف</label>
                                 <textarea name="description" class="form-control" rows="5"></textarea>
                             </div>
+                            <hr>
+                            <h5>تعيين أعضاء الفريق والصلاحيات</h5>
+                            <div class="form-group">
+                                <table class="table table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 10px">اختر</th>
+                                        <th>المستخدم</th>
+                                        <th>إعطاء صلاحية التعديل؟</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach ($allUsers as $user): ?>
+                                        <tr>
+                                            <td>
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox" id="user_<?php echo $user['id']; ?>" name="users[]" value="<?php echo $user['id']; ?>">
+                                                    <label for="user_<?php echo $user['id']; ?>" class="custom-control-label"></label>
+                                                </div>
+                                            </td>
+                                            <td><?php echo htmlspecialchars($user['username']); ?></td>
+                                            <td>
+                                                <div class="custom-control custom-switch">
+                                                    <input type="checkbox" class="custom-control-input" id="perm_<?php echo $user['id']; ?>" name="can_edit[<?php echo $user['id']; ?>]" value="1">
+                                                    <label class="custom-control-label" for="perm_<?php echo $user['id']; ?>">سماح بالتعديل/الحذف</label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+
                             <button type="submit" class="btn btn-success">إضافة المشروع</button>
                         </form>
                     </div>
@@ -104,5 +177,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script src="../js/bootstrap.bundle.js"></script>
 <!-- AdminLTE App -->
 <script src="../js/adminlte.js"></script>
+<script>
+    // كود لمنع الضغط على الزر مرتين
+    $('form').on('submit', function() {
+        var btn = $(this).find('button[type="submit"]');
+        btn.prop('disabled', true);
+        btn.html('<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...');
+    });
+</script>
+
 </body>
 </html>

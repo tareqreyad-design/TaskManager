@@ -2,11 +2,16 @@
 session_start();
 require_once 'db.php';
 
-// يفضل الأدمن بس اللي يحذف مشاريع
-if ($_SESSION['role'] !== 'Admin') {
-    header("Location: projects.php?error=no_permission");
+session_start();
+require_once 'db.php';
+
+// حماية: لو مش أدمن، اطرده برة الصفحة فوراً
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
+    header('Location: projects.php?error=access_denied');
     exit;
 }
+
+// ... كمل باقي الكود عادي
 
 $id = $_GET['id'];
 

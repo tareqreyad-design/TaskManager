@@ -37,7 +37,7 @@
                         <h3><?php echo $tasksByStatus['In Progress'] ?? 0; ?></h3>
                         <p>قيد التنفيذ (In Progress) </p>
                     </div>
-                    <div class="icon"><i class="fas fa-spin"></i></div>
+                    <div class="icon"><i class="fas fa-spinner"></i></div>
                 </div>
             </div>
             <div class="col-lg-3 col-6">
@@ -81,7 +81,7 @@
                             <?php else: foreach ($overdueTasks as $task): ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($task['title']); ?></td>
-                                    <td><span class="badge badge-secondary"><?php echo htmlspecialchars($task['project_name']); ?></span></td>
+                                    <td><?php echo htmlspecialchars($task['project_name']); ?></td>
                                     <td><span class="text-danger font-weight-bold"><?php echo $task['due_date']; ?></span></td>
                                 </tr>
                             <?php endforeach; endif; ?>
