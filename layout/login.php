@@ -56,7 +56,7 @@
 
 <div class="login-box">
     <div class="login-logo">
-        <b>LogIN</b> Page
+        صفحة<b>تسجيل الدخول</b>
     </div>
     <!-- /.login-logo -->
     <div class="card">

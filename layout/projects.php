@@ -44,6 +44,26 @@ if ($role === 'Admin') {
 }
 
 $projects = $stmt->fetchAll();
+
+// استقبال كلمة البحث
+$search = $_GET['search'] ?? '';
+
+// جملة الـ SQL (سواء للأدمن أو الميمبر) هنزود عليها شرط
+$sql = "SELECT t.* ... (باقي الكود زي ما هو) ... WHERE 1=1";
+
+// لو فيه بحث، زود الشرط ده
+if ($search) {
+    $sql .= " AND t.title LIKE :search";
+}
+
+$stmt = $pdo->prepare($sql);
+
+// لو فيه بحث، ابعت القيمة
+if ($search) {
+    $stmt->bindValue(':search', "%$search%");
+}
+
+// كمل تنفيذ الـ execute عادي...
 ?>
 
 <!DOCTYPE html>
@@ -90,6 +110,18 @@ $projects = $stmt->fetchAll();
                             <a href="projects_create.php" class="btn btn-sm btn-success">
                                 <i class="fas fa-plus"></i> إضافة مشروع جديد
                             </a>
+                            <br>
+                            <br>
+                            <div class="card-tools">
+                                <form method="GET" class="input-group input-group-sm" style="width: 150px;">
+                                    <input type="text" name="search" class="form-control float-right" placeholder="بحث عن مشروع..." value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-default">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                     <div class="card-body table-responsive p-0">

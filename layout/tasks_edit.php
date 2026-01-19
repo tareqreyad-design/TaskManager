@@ -59,11 +59,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <?php include 'aside.php'; ?>
 
     <div class="content-wrapper">
-        <section class="content-header">
-            <div class="container-fluid">
-                <h1>تعديل المهمة:  <?= htmlspecialchars($task['title']) ?></h1>
 
+        <section class="content-header">
+
+            <div class="card card-info">
+                <div class="card-header"><h3 class="card-title"> تعديل المهمة: <?= htmlspecialchars($task['title']) ?></h3>
+                    <div class="card-tools">
+                        <a href="tasks.php" class="btn btn-sm btn-success">
+                            <i class="nav-icon fas fa-tasks" ></i> المهام
+                        </a>
+                    </div>
+                </div>
             </div>
+
         </section>
 
         <section class="content">

@@ -1,5 +1,4 @@
 
-
 <div class="content">
     <div class="container-fluid">
         <div class="content-header">
@@ -130,7 +129,83 @@
                 </div>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">توزيع حالات المهام</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="taskChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">نسبة إنجاز المشاريع</h3>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>المشروع</th>
+                        <th>التقدم</th>
+                        <th style="width: 40px">النسبة</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach($projectProgress as $proj):
+                        // حساب النسبة المئوية
+                        $percent = $proj['total_tasks'] > 0 ? round(($proj['done_tasks'] / $proj['total_tasks']) * 100) : 0;
+
+                        // تحديد لون الشريط حسب النسبة
+                        $color = 'bg-danger';
+                        if($percent > 50) $color = 'bg-warning';
+                        if($percent == 100) $color = 'bg-success';
+                        ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($proj['name']); ?></td>
+                            <td>
+                                <div class="progress progress-xs">
+                                    <div class="progress-bar <?php echo $color; ?>" style="width: <?php echo $percent; ?>%"></div>
+                                </div>
+                            </td>
+                            <td><span class="badge <?php echo $color; ?>"><?php echo $percent; ?>%</span></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<script>
+    var ctx = document.getElementById('taskChart').getContext('2d');
+    var donutData = {
+        labels: [
+            'مطلوبة (To Do)',
+            'قيد التنفيذ (In Progress)',
+            'مكتملة (Done)'
+        ],
+        datasets: [
+            {
+                data: [<?php echo $todo_count; ?>, <?php echo $progress_count; ?>, <?php echo $done_count; ?>],
+                backgroundColor : ['#17a2b8', '#ffc107', '#28a745'],
+            }
+        ]
+    }
+    var pieChart = new Chart(ctx, {
+        type: 'doughnut', // ممكن تخليها 'pie' لو عايزها دائرة مقفولة
+        data: donutData,
+        options: {
+            maintainAspectRatio : false,
+            responsive : true,
+        }
+    })
+</script>
 <?php

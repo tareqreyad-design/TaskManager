@@ -98,10 +98,25 @@ if (isset($_GET['success'])) {
     <?php include 'nav.php'; ?>
     <?php include 'aside.php'; ?>
     <div class="content-wrapper">
-        <section class="content">
+
+
+        <section class="content-header">
             <div class="card card-info">
-                <div class="card-header"><h3 class="card-title">تعديل المشروع: <?= htmlspecialchars($project['name']) ?></h3></div>
-                <form method="POST">
+                <div class="card-header"><h3 class="card-title">تعديل المشروع: <?= htmlspecialchars($project['name']) ?></h3>
+                    <div class="card-tools">
+                        <a href="projects.php" class="btn btn-sm btn-primary">
+                            <i class="nav-icon fas fa-project-diagram" ></i> المشاريع
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+                <section class="content">
+
+                    <div class="card card-warning">
+                    <form method="POST">
                     <div class="card-body">
                         <div class="form-group">
                             <label>اسم المشروع</label>
@@ -166,9 +181,11 @@ if (isset($_GET['success'])) {
                         <button type="submit" class="btn btn-info"> حفظ التعديلات </button>
                         <a href="projects.php" class="btn btn-default">رجوع</a>
                     </div>
-                </form>
+                     </form>
+                    </div>
+                </section>
+
             </div>
-        </section>
     </div>
 </div>
 </body>

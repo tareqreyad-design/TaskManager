@@ -17,7 +17,6 @@ try {
     // هنا هنعملها عامة للمشروع ككل عشان الداشبورد يبقى شكلها غني
     $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM tasks GROUP BY status");
     $stats = $stmt->fetchAll(PDO::FETCH_KEY_PAIR); // ['To Do' => 5, 'Done' => 3]
-
     // تجهيز الأرقام (عشان لو الحالة مش موجودة نكتب 0)
     $todo_count = $stats['To Do'] ?? 0;
     $progress_count = $stats['In Progress'] ?? 0;
@@ -61,6 +60,20 @@ try {
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }
+
+// جلب تقدم المشاريع (نسبة الإنجاز)
+$progStmt = $pdo->prepare("
+    SELECT p.name, 
+           COUNT(t.id) as total_tasks,
+           SUM(CASE WHEN t.status = 'Done' THEN 1 ELSE 0 END) as done_tasks
+    FROM projects p
+    LEFT JOIN tasks t ON p.id = t.project_id
+    GROUP BY p.id
+    HAVING total_tasks > 0
+    LIMIT 5
+");
+$progStmt->execute();
+$projectProgress = $progStmt->fetchAll();
 ?>
 
 <!DOCTYPE html>
@@ -99,7 +112,8 @@ try {
             </div>
         </div>
         <!-- /.content-header -->
-        
+
+
         <section class="content">
             <div class="container-fluid">
         <!-- Main content -->
@@ -164,6 +178,33 @@ try {
 <!---->
 <!--<!-- AdminLTE JS (أخيرًا) -->-->
 <!-- <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>-->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    var ctx = document.getElementById('taskChart').getContext('2d');
+    var donutData = {
+        labels: [
+            'مطلوبة (To Do)',
+            'قيد التنفيذ (In Progress)',
+            'مكتملة (Done)'
+        ],
+        datasets: [
+            {
+                data: [<?php echo $todo_count; ?>, <?php echo $progress_count; ?>, <?php echo $done_count; ?>],
+                backgroundColor : ['#17a2b8', '#ffc107', '#28a745'],
+            }
+        ]
+    }
+    var pieChart = new Chart(ctx, {
+        type: 'doughnut', // ممكن تخليها 'pie' لو عايزها دائرة مقفولة
+        data: donutData,
+        options: {
+            maintainAspectRatio : false,
+            responsive : true,
+        }
+    })
+</script>
 
   </body>
   </html>

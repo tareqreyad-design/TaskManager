@@ -1,24 +1,33 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="dashbord.php" class="brand-link">
-        <span class="brand-text font-weight-light"> Task Management </span>
+
+    <a href="#" class="brand-link">
+        <span class="brand-text font-weight-light"> Company Name </span>
     </a>
     <!-- Sidebar -->
     <div class="sidebar">
         <!-- Sidebar user panel (optional) -->
-            <div class="brand-panel mt-3 pb-3 mb-3 d-flex align-items-center">
+        <li class="nav-item">
 
-                <!-- Company Logo -->
-                <div class="image">
-                <img src="#"
-                     alt="Company Logo"
-                     style="width:40px; height:40px; opacity:0.9;">
-                </div>
+        <a href="profile.php" class="nav-link"  style="color: antiquewhite; font-weight: bold;">
+            <i class="nav-icon fas fa-user-cog"></i>
+
+            <span class="d-none d-md-inline"><?php echo htmlspecialchars($_SESSION['username'] ?? 'User' ); ?></span>
+        </a>
+        </li>
+
+            <div class="brand-panel mt-3 pb-3 mb-3 d-flex align-items-cente">
+
+<!--                 Company Logo-->
+<!--                <div class="image">-->
+<!--                <img src="#"-->
+<!--                     alt="Company Logo"-->
+<!--                     style="width:40px; height:40px; opacity:0.9;">-->
+<!--                </div>-->
 
                 <!-- Company Name -->
-                <div class="info ml-2" style="color: antiquewhite; font-weight: bold;">
-<!--                    <a href="#" class="d-block">--><?php //echo htmlspecialchars($_SESSION['username'] ?? 'Guest'); ?><!--</a>-->
-                    <span class="d-none d-md-inline">Company name</span>
+                <div class="info ml-2" style="color: antiquewhite; font-weight: normal;">
+                    <span class="d-none d-md-inline">task name</span>
                 </div>
 
             </div>
@@ -116,6 +125,7 @@
                 </li>
 
             </ul>
+
         </nav>
     </div>
     <!-- /.sidebar -->
